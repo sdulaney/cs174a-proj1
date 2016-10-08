@@ -215,39 +215,53 @@ Animation.prototype.display = function(time)
 
 
 
-	// Begin snowman-demo
-	model_transform = mult( model_transform, rotation( this.graphicsState.animation_time/20, 0, 1, 0 ) );
-	this.m_sphere.draw( this.graphicsState, model_transform, earth );					// Head
+	// Begin stack-based-function implementation of snowman-demo
+	Animation.prototype.drawSnowman = function(model_transform)
+	{
+		var blueThing = new Material( vec4( 0.5,0.5,0.5,1 ), 1, 1, 1, 40 );
 
-	model_transform = mult( model_transform, translation( 0, 0, 2 ) );
-	model_transform = mult( model_transform, scale( 0.3, 0.3, 1 ) );
-	this.m_cone.draw( this.graphicsState, model_transform, greyPlastic );				// Nose
-	model_transform = mult( model_transform, scale( 1/0.3, 1/0.3, 1/1 ) );
-	model_transform = mult( model_transform, translation( 0, 0, -2 ) );
+		var stack = [];
 
-	model_transform = mult( model_transform, translation( 0, -3, 0 ) );
-	model_transform = mult( model_transform, scale( 2, 2, 2) );
-	this.m_sphere.draw( this.graphicsState, model_transform, earth );					// Middle sphere
+		model_transform = mult( model_transform, rotation( this.graphicsState.animation_time/20, 0, 1, 0 ) );
 
-	model_transform = mult( model_transform, rotation( 90, 0, 1, 0 ) );
-	model_transform = mult( model_transform, translation( 0, 0, 2 ) );
-	model_transform = mult( model_transform, scale( 0.1, 0.1, 2) );
-	this.m_cylinder.draw( this.graphicsState, model_transform, greyPlastic );			// Right arm
-	model_transform = mult( model_transform, scale( 1/0.1, 1/0.1, 1/2) );
-	model_transform = mult( model_transform, translation( 0, 0, -2 ) );
-	model_transform = mult( model_transform, rotation( -90, 0, 1, 0 ) );
+		stack.push(model_transform);
+		model_transform = mult( model_transform, translation( 0, 0, 2 ) );
+		  model_transform = mult( model_transform, scale( 0.3, 0.3, 1 ) );
+		      this.m_cone.draw( this.graphicsState, model_transform, blueThing );     // Nose
+		model_transform = stack.pop();
 
-	model_transform = mult( model_transform, rotation( -90, 0, 1, 0 ) );
-	model_transform = mult( model_transform, translation( 0, 0, 2 ) );
-	model_transform = mult( model_transform, scale( 0.1, 0.1, 2) );
-	this.m_cylinder.draw( this.graphicsState, model_transform, greyPlastic );			// Left arm
-	model_transform = mult( model_transform, scale( 1/0.1, 1/0.1, 1/2) );
-	model_transform = mult( model_transform, translation( 0, 0, -2 ) );
-	model_transform = mult( model_transform, rotation( 90, 0, 1, 0 ) );
-
-	model_transform = mult( model_transform, translation( 0, -3, 0 ) );
-	model_transform = mult( model_transform, scale( 2, 2, 2) );
-	this.m_sphere.draw( this.graphicsState, model_transform, earth );					// Bottom sphere
+		this.m_sphere.draw( this.graphicsState, model_transform, blueThing );		// 1st sphere (head)
 
 
+		model_transform = mult( model_transform, translation( 0, -3, 0 ) );
+		model_transform = mult( model_transform, scale( 2, 2, 2 ) )
+		this.m_sphere.draw( this.graphicsState, model_transform, blueThing );		// 2nd sphere
+
+
+		for( var angle = -90; angle <= 90; angle += 2 * 90 )
+		{
+		stack.push(model_transform);
+		model_transform = mult( model_transform, rotation( angle, 0, 1, 0 ) );
+		    model_transform = mult( model_transform, rotation( 45, -1, 0, 0 ) );
+		        model_transform = mult( model_transform, translation( 0, 0, 2 ) );
+		            model_transform = mult( model_transform, scale( 0.1, 0.1, 2 ) )
+		                this.m_capped.draw( this.graphicsState, model_transform, blueThing );	// Arms
+		model_transform = stack.pop();
+		}
+
+
+		model_transform = mult( model_transform, translation( 0, -3, 0 ) );
+		model_transform = mult( model_transform, scale( 2, 2, 2 ) )
+		this.m_sphere.draw( this.graphicsState, model_transform, blueThing );			// 3rd sphere
+
+
+		model_transform = mult( model_transform, translation( 0, -3, 0 ) );
+		model_transform = mult( model_transform, scale( 2, 2, 2 ) )
+		this.m_sphere.draw( this.graphicsState, model_transform, blueThing );			// 4th sphere
+
+		return model_transform;
+		}
+
+		// Call stack-based-function
+		model_transform = this.drawSnowman( mult( model_transform, translation( 0, 30, -15) ) );
 	}
